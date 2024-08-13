@@ -1,73 +1,24 @@
-// #include <verilated.h>
-// #include <verilated_vcd_c.h>
-// #include "Vtop.h" // 包含Verilator生成的顶层模块头文件
 
-// int main(int argc, char** argv, char** env) {
-//     // 初始化 Verilator
-//     Verilated::commandArgs(argc, argv);
-//     Vtop* top = new Vtop; // 创建顶层模块实例
-
-//     // 初始化波形生成
-//     VerilatedVcdC* tfp = nullptr;
-//     Verilated::traceEverOn(true);
-//     const char* vcdfile = "waveform.vcd";
-
-//         tfp = new VerilatedVcdC;
-//         top->trace(tfp, 99);  // 追踪深度为99
-//         tfp->open(vcdfile);   // 打开波形文件
-    
-
-//     // 运行仿真循环
-//     while (!Verilated::gotFinish()) {
-//         // 生成随机输入
-//         int a = rand() & 1;
-//         int b = rand() & 1;
-//         top->a = a;
-//         top->b = b;
-
-//         // 评估电路
-//         top->eval();
-
-//         // 打印输入和输出
-//         printf("a = %d, b = %d, f = %d\n", a, b, top->f);
-
-//         // 检查输出是否正确
-//         assert(top->f == (a ^ b));
-
-//         // 如果启用了波形追踪，记录当前时间的波形
-//         if (tfp) {
-//             tfp->dump(Verilated::time());
-//         }
-
-//         // 增加仿真时间
-//         Verilated::timeInc(1);
-//     }
-
-//     // 清理
-//     if (tfp) {
-//         tfp->close(); // 关闭波形文件
-//         delete tfp;
-//     }
-//     delete top;
-//     return 0;
-// }
 #include <memory>
 #include <verilated.h>
 #include "Vtop.h"
 #include "verilated_vcd_c.h"
+#include <nvboard.h>
 #include <cstdlib>  // 包含 rand() 函数
 #include <cstdio>   // 包含 printf 函数
 #include <cassert>  // 包含 assert 函数
 
-// 模拟时间戳函数
-double sc_time_stamp() { return 0; }
+// 模拟时间戳函数vluint64_t sim_time = 0; 
+int sim_time = 999; 
+void nvboard_bind_all_pins(TOP_NAME* top);
+// void nvboard_bind_all_pins(Vtop* top) ;
+
 
 int main(int argc, char **argv) {
     // 防止未使用的参数警告
     if (false && argc && argv) {}
     
-    // nvboard_bind_all_pins(&dut);
-    // nvboard_init();
+    
     // 创建 Verilator 上下文
     const std::unique_ptr<VerilatedContext> contextp{new VerilatedContext};
     contextp->debug(0);
@@ -83,8 +34,16 @@ int main(int argc, char **argv) {
     top->trace(tfp, 0);
     tfp->open("wave.vcd");  // 设置波形输出文件为 wave.vcd
 
+    nvboard_bind_all_pins(top.get());
+    nvboard_init();
+    
+    while(1)
+    {
+        top->eval();
+        nvboard_update();
+    }
     // 仿真主循环
-    for (int i = 0; i < 100; ++i) {  // 运行 100 次仿真循环
+    while (!contextp->gotFinish() && contextp->time() < sim_time){  
         // 随机生成 a 和 b 的值
         int a = rand() & 1;
         int b = rand() & 1;
@@ -105,9 +64,12 @@ int main(int argc, char **argv) {
 
         // 增加时间
         contextp->timeInc(1);
+
+        nvboard_update();
     }
 
     // 仿真结束处理
+    nvboard_quit();
     top->final();
     tfp->close();
     delete tfp;
