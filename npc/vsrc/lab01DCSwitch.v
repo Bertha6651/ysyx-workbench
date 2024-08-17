@@ -1,4 +1,4 @@
-module top(
+module lab01DCSwitch(
     input a,
     input b,
     output f

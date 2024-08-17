@@ -21,7 +21,7 @@
 # # 运行仿真
 # run: $(EXE)
 # 	obj_dir/$(EXE)
-TOPNAME = ex03ALU
+TOPNAME = lab02Streaminglight
 NXDC_FILES = constr/$(TOPNAME).nxdc
 INC_PATH ?=
 
@@ -80,12 +80,13 @@ wave: $(EXE)
 # # # 保留 git 追踪命令
 # # sim: $(EXE)
 # # 	$(call git_commit, "sim RTL")
-
-sim:
-	$(call git_commit, "sim RTL") # DO NOT REMOVE THIS LINE!!!
-	@echo "Write this Makefile by your self."
+run:
 	$(BIN)
 	@$^
+	
+sim:
+	$(call git_commit, "lab02Streaminglight  实现lab2流水线实验") # DO NOT REMOVE THIS LINE!!!
+	
 
 include  ../Makefile
 
