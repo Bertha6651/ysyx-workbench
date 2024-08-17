@@ -21,7 +21,7 @@
 # # 运行仿真
 # run: $(EXE)
 # 	obj_dir/$(EXE)
-TOPNAME = lab02Streaminglight
+TOPNAME = ex06RegisterOrShifter
 NXDC_FILES = constr/$(TOPNAME).nxdc
 INC_PATH ?=
 
@@ -85,7 +85,7 @@ run:
 	@$^
 	
 sim:
-	$(call git_commit, "lab02Streaminglight  实现lab2流水线实验") # DO NOT REMOVE THIS LINE!!!
+	$(call git_commit, "ex06RegisterOrShifter")   # DO NOT REMOVE THIS LINE!!!
 	
 
 include  ../Makefile
