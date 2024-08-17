@@ -21,7 +21,7 @@
 # # 运行仿真
 # run: $(EXE)
 # 	obj_dir/$(EXE)
-TOPNAME = top
+TOPNAME = ex01Seletor
 NXDC_FILES = constr/$(TOPNAME).nxdc
 INC_PATH ?=
 
@@ -86,6 +86,6 @@ sim:
 	$(call git_commit, "sim RTL") # DO NOT REMOVE THIS LINE!!!
 	@echo "Write this Makefile by your self."
 
-include ../Makefile
+include  ../Makefile
 
 .PHONY: default all clean run wave sim
