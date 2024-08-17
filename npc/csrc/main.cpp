@@ -188,7 +188,7 @@
 // }
 
 #include <nvboard.h>
-#include <Vex02DeOrEncoder.h>
+#include <Vex03ALU.h>
 
 static TOP_NAME dut;
 

@@ -21,7 +21,7 @@
 # # 运行仿真
 # run: $(EXE)
 # 	obj_dir/$(EXE)
-TOPNAME = ex02DeOrEncoder
+TOPNAME = ex03ALU
 NXDC_FILES = constr/$(TOPNAME).nxdc
 INC_PATH ?=
 
@@ -63,8 +63,7 @@ $(BIN): $(VSRCS) $(CSRCS) $(NVBOARD_ARCHIVE)
 
 all: default
 
-run: $(BIN)
-	@$^
+
 
 clean:
 	rm -rf $(BUILD_DIR) wave.vcd
@@ -85,6 +84,8 @@ wave: $(EXE)
 sim:
 	$(call git_commit, "sim RTL") # DO NOT REMOVE THIS LINE!!!
 	@echo "Write this Makefile by your self."
+	$(BIN)
+	@$^
 
 include  ../Makefile
 
