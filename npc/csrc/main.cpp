@@ -1,4 +1,3 @@
-
 // #include <memory>
 // #include <verilated.h>
 // #include "Vex01Seletor.h"
@@ -189,7 +188,7 @@
 // }
 
 #include <nvboard.h>
-#include <Vex01Seletor.h>
+#include <Vex02DeOrEncoder.h>
 
 static TOP_NAME dut;
 

@@ -6,6 +6,7 @@
     input [1:0] Y,
     output reg [1:0] F
 );
+
 always @(*)  begin
     case(Y)
     2'b00:F=X0;

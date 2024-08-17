@@ -21,7 +21,7 @@
 # # 运行仿真
 # run: $(EXE)
 # 	obj_dir/$(EXE)
-TOPNAME = ex01Seletor
+TOPNAME = ex02DeOrEncoder
 NXDC_FILES = constr/$(TOPNAME).nxdc
 INC_PATH ?=
 
