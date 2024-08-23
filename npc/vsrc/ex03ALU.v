@@ -93,23 +93,3 @@ end
 
 endmodule
 
-module bcd7seg(
-  input  [2:0] b,
-  output reg [7:0] h
-);
-// detailed implementation ...
-always @(*) begin
-    case(b)
-        3'd0:h=~8'b11111101;
-        3'd1:h=~8'b01100000;
-        3'd2:h=~8'b11011010;
-        3'd3:h=~8'b11110010;
-        3'd4:h=~8'b01100110;
-        3'd5:h=~8'b10110110;
-        3'd6:h=~8'b10111110;
-        3'd7:h=~8'b11100000;
-        default:h=~8'b11111101;
-    endcase
-
-end
-endmodule

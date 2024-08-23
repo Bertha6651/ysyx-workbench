@@ -21,7 +21,7 @@
 # # 运行仿真
 # run: $(EXE)
 # 	obj_dir/$(EXE)
-TOPNAME = ex06RegisterOrShifter
+TOPNAME = ex07FSmachAndKBInput
 NXDC_FILES = constr/$(TOPNAME).nxdc
 INC_PATH ?=
 
@@ -85,12 +85,7 @@ run:
 	@$^
 	
 sim:
-	$(call git_commit, "ex06RegisterOrShifter
-完成了实验6，完成了利用 移位寄存器实现随机数发生器\n
-	但是还没完全完成
-		1.移位寄存器实现 
-		2.桶形移位器 
-		3.线性反馈移位寄存器")   # DO NOT REMOVE THIS LINE!!!
+	$(call git_commit, "ex07FSmachAndKBInput")   # DO NOT REMOVE THIS LINE!!!
 	
 
 include  ../Makefile
