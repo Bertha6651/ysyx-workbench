@@ -17,6 +17,14 @@ BINARY   = $(BUILD_DIR)/$(NAME)$(SO)
 # Compilation flags
 ifeq ($(CC),clang)
 CXX := clang++
+
+# 	clang  is  a C, C++, and Objective-C compiler which encompasses preprocessing, parsing, optimization, 
+# code generation, assembly, and linking.  Depending on which high-level mode setting is passed, 
+# Clang will stop before doing a full link.  While Clang is highly integrated
+# , it is important  to  understand the stages of compilation, to understand how to invoke it. 
+
+
+
 else
 CXX := g++
 endif
@@ -39,6 +47,8 @@ $(OBJ_DIR)/%.o: %.cc
 	@mkdir -p $(dir $@)
 	@$(CXX) $(CFLAGS) $(CXXFLAGS) -c -o $@ $<
 	$(call call_fixdep, $(@:.o=.d), $@)
+	
+# call_fixdep的调用用于生成更合理的依赖关系, 目前我们主要关注编译的命令, 因此可以先忽略call_fixdep.
 
 # Depencies
 -include $(OBJS:.o=.d)

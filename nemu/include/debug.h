@@ -23,6 +23,8 @@
 #define Log(format, ...) \
     _Log(ANSI_FMT("[%s:%d %s] " format, ANSI_FG_BLUE) "\n", \
         __FILE__, __LINE__, __func__, ## __VA_ARGS__)
+//   Log()是printf()的升级版, 专门用来输出调试信息, 同时还会输出使用Log()所在的源文件, 
+// 行号和函数. 当输出的调试信息过多的时候, 可以很方便地定位到代码中的相关位置
 
 #define Assert(cond, format, ...) \
   do { \
@@ -35,8 +37,10 @@
       assert(cond); \
     } \
   } while (0)
+// Assert()是assert()的升级版, 当测试条件为假时, 在assertion fail之前可以输出一些信息
 
 #define panic(format, ...) Assert(0, format, ## __VA_ARGS__)
+// panic()用于输出信息并结束程序, 相当于无条件的assertion fail
 
 #define TODO() panic("please implement me")
 

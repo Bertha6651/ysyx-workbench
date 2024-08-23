@@ -46,4 +46,9 @@ uint64_t get_time() {
 
 void init_rand() {
   srand(get_time_internal());
+  //  The srand() function sets its argument as the seed for  a  new  sequence  of
+  //  pseudo-random  integers  to  be returned by rand().  These sequences are re‐
+  //  peatable by calling srand() with the same seed value.
+
+
 }

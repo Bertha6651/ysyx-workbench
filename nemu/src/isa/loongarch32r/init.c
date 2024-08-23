@@ -27,7 +27,10 @@ static const uint32_t img [] = {
 };
 
 static void restart() {
-  /* Set the initial program counter. */
+  /* Set the initial program counter. 初始化寄存器*/
+  //    在CPU中, 寄存器是一个结构化特征较强的存储部件, 
+  // 在C语言中我们就很自然地使用相应的结构体来描述CPU的寄存器结构. 
+  
   cpu.pc = RESET_VECTOR;
 
   /* The zero register is always 0. */
@@ -37,6 +40,10 @@ static void restart() {
 void init_isa() {
   /* Load built-in image. */
   memcpy(guest_to_host(RESET_VECTOR), img, sizeof(img));
+      //  memcpy - copy memory area
+      //    The  memcpy()  function  copies  n bytes from memory area src to memory area
+      //  dest.  The memory areas must not overlap.  Use memmove(3) if the memory  ar‐
+      //  eas do overlap.
 
   /* Initialize this virtual computer system. */
   restart();

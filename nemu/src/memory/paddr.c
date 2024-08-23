@@ -25,6 +25,10 @@ static uint8_t pmem[CONFIG_MSIZE] PG_ALIGN = {};
 #endif
 
 uint8_t* guest_to_host(paddr_t paddr) { return pmem + paddr - CONFIG_MBASE; }
+  //  An  unsigned integer type of a fixed width of exactly N bits, N being
+  // the value specified in its type name.  According to  the  C  language
+  // standard,  they  shall  be capable of storing values in the range 
+  // [0,UINTN_MAX], substituting N by the appropriate number.
 paddr_t host_to_guest(uint8_t *haddr) { return haddr - pmem + CONFIG_MBASE; }
 
 static word_t pmem_read(paddr_t addr, int len) {
@@ -62,3 +66,4 @@ void paddr_write(paddr_t addr, int len, word_t data) {
   IFDEF(CONFIG_DEVICE, mmio_write(addr, len, data); return);
   out_of_bound(addr);
 }
+// 在客户程序运行的过程中, 总是使用vaddr_read()和vaddr_write() 来访问模拟的内存. vaddr, paddr分别代表虚拟地址和物理地址.

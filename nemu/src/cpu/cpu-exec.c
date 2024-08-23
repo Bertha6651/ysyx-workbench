@@ -40,7 +40,8 @@ static void trace_and_difftest(Decode *_this, vaddr_t dnpc) {
   IFDEF(CONFIG_DIFFTEST, difftest_step(_this->pc, dnpc));
 }
 
-static void exec_once(Decode *s, vaddr_t pc) {
+static void exec_once(Decode *s, vaddr_t pc) 
+{
   s->pc = pc;
   s->snpc = pc;
   isa_exec_once(s);
@@ -48,6 +49,8 @@ static void exec_once(Decode *s, vaddr_t pc) {
 #ifdef CONFIG_ITRACE
   char *p = s->logbuf;
   p += snprintf(p, sizeof(s->logbuf), FMT_WORD ":", s->pc);
+  int snprintf(char *str, size_t size, const char *format, ...);
+// int snprintf(char *str, size_t size, const char *format, ...);
   int ilen = s->snpc - s->pc;
   int i;
   uint8_t *inst = (uint8_t *)&s->isa.inst.val;
@@ -73,7 +76,18 @@ static void exec_once(Decode *s, vaddr_t pc) {
 
 static void execute(uint64_t n) {
   Decode s;
-  for (;n > 0; n --) {
+  for (;n > 0; n --) //代码将在一个for循环中调用exec_once
+//   EMU将不断执行指令, 直到遇到以下情况之一, 才会退出指令执行的循环:
+//      1.达到要求的循环次数.
+//      2.客户程序执行了nemu_trap指令. 这是一条虚构的特殊指令, 它是为了在NEMU中让客户程序指示执行的结束而加入的, 
+//      NEMU在ISA手册中选择了一些用于调试的指令, 并将nemu_trap的特殊含义赋予它们. 
+//      例如在riscv32的手册中, NEMU选择了ebreak指令来充当nemu_trap. 为了表示客户程序是否成功结束, 
+//      nemu_trap指令还会接收一个表示结束状态的参数. 当客户程序执行了这条指令之后, NEMU将会根据这个结束状态参数来设置NEMU的结束状态, 
+//      并根据不同的状态输出不同的结束信息, 主要包括
+//        HIT GOOD TRAP - 客户程序正确地结束执行
+//        HIT BAD TRAP - 客户程序错误地结束执行
+//        ABORT - 客户程序意外终止, 并未结束执行
+  {
     exec_once(&s, cpu.pc);
     g_nr_guest_inst ++;
     trace_and_difftest(&s, cpu.pc);
@@ -108,7 +122,7 @@ void cpu_exec(uint64_t n) {
 
   uint64_t timer_start = get_time();
 
-  execute(n);
+  execute(n);//模拟了CPU的工作方式：不断执行指令
 
   uint64_t timer_end = get_time();
   g_timer += timer_end - timer_start;
@@ -121,7 +135,9 @@ void cpu_exec(uint64_t n) {
           (nemu_state.state == NEMU_ABORT ? ANSI_FMT("ABORT", ANSI_FG_RED) :
            (nemu_state.halt_ret == 0 ? ANSI_FMT("HIT GOOD TRAP", ANSI_FG_GREEN) :
             ANSI_FMT("HIT BAD TRAP", ANSI_FG_RED))),
-          nemu_state.halt_pc);
+          nemu_state.halt_pc);//    NEMU会在cpu_exec()函数的最后打印执行的指令数目和花费的时间, 并计算出指令执行的频率. 
+                              // 但由于内置客户程序太小, 执行很快就结束了, 目前无法计算出有意义的频率, 
+                              // 将来运行一些复杂的程序时, 此处输出的频率可以用于粗略地衡量NEMU的性能.
       // fall through
     case NEMU_QUIT: statistic();
   }

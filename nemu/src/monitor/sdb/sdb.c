@@ -33,7 +33,7 @@ static char* rl_gets() {
     line_read = NULL;
   }
 
-  line_read = readline("(nemu) ");
+  line_read = readline("(nemu) ");//readline - get a line from a user with editing
 
   if (line_read && *line_read) {
     add_history(line_read);
@@ -106,7 +106,12 @@ void sdb_mainloop() {
     char *str_end = str + strlen(str);
 
     /* extract the first token as the command */
-    char *cmd = strtok(str, " ");
+    char *cmd = strtok(str, " ");//strtok, strtok_r - extract tokens from strings
+      //      The  strtok()  function  breaks  a string into a sequence of zero or more
+      //    nonempty tokens.  On the first call to strtok(), the string to be  parsed
+      //    should  be  specified  in str.  In each subsequent call that should parse
+      //    the same string, str must be NULL.
+
     if (cmd == NULL) { continue; }
 
     /* treat the remaining string as the arguments,

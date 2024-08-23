@@ -32,7 +32,6 @@ static void welcome() {
   Log("Build time: %s, %s", __TIME__, __DATE__);
   printf("Welcome to %s-NEMU!\n", ANSI_FMT(str(__GUEST_ISA__), ANSI_FG_YELLOW ANSI_BG_RED));
   printf("For help, type \"help\"\n");
-  Log("Exercise: Please remove me in the source code and compile NEMU again.");
   assert(0);
 }
 
@@ -46,7 +45,8 @@ static char *diff_so_file = NULL;
 static char *img_file = NULL;
 static int difftest_port = 1234;
 
-static long load_img() {
+static long load_img()//这个函数会将一个有意义的客户程序从镜像文件读入到内存, 覆盖刚才的内置客户程序. 
+ {
   if (img_file == NULL) {
     Log("No image is given. Use the default build-in image.");
     return 4096; // built-in image size
@@ -54,7 +54,7 @@ static long load_img() {
 
   FILE *fp = fopen(img_file, "rb");
   Assert(fp, "Can not open '%s'", img_file);
-
+//  assert - abort the program if assertion is false
   fseek(fp, 0, SEEK_END);
   long size = ftell(fp);
 
