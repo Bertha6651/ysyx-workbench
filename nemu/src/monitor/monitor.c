@@ -33,9 +33,11 @@ static void welcome() //输出了各种信息
   Log("Build time: %s, %s", __TIME__, __DATE__);
   printf("Welcome to %s-NEMU!\n", ANSI_FMT(str(__GUEST_ISA__), ANSI_FG_YELLOW ANSI_BG_RED));
   printf("For help, type \"help\"\n");
-  assert(0);
+  assert(1);//8-25 日修改了一版
 }
-
+/*概念：C/C++ 中的 assert 是一个宏，用于在运行时检查一个条件是否为真，如果条件不满足，则运行时将终止程序的执行并输出一条错误信息。
+如果这个语句的结果为 false，assert 宏就会以"Assertion failed: , file , line "的形式显示出错信息，然后使程序崩溃并终止运行。如果该语句的结果为 true，则 assert 宏不做任何操作。
+*/
 #ifndef CONFIG_TARGET_AM
 #include <getopt.h>
 
