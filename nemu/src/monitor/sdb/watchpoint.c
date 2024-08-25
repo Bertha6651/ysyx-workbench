@@ -19,7 +19,7 @@
 
 typedef struct watchpoint {
   int NO;
-  struct watchpoint *next;
+  struct watchpoint *next;//个指向下一个监视点的指针(链表)
 
   /* TODO: Add more members if necessary */
 
@@ -31,12 +31,12 @@ static WP *head = NULL, *free_ = NULL;
 void init_wp_pool() {
   int i;
   for (i = 0; i < NR_WP; i ++) {
-    wp_pool[i].NO = i;
+    wp_pool[i].NO = i;//初始化编号
     wp_pool[i].next = (i == NR_WP - 1 ? NULL : &wp_pool[i + 1]);
   }
 
   head = NULL;
-  free_ = wp_pool;
+  free_ = wp_pool;//指向监视池开头，准备接受新的监视点请求。
 }
 
 /* TODO: Implement the functionality of watchpoint */

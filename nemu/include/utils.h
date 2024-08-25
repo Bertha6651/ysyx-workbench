@@ -28,7 +28,7 @@ typedef struct {
   uint32_t halt_ret;
 } NEMUState;
 
-extern NEMUState nemu_state;
+extern NEMUState nemu_state;//extern 关键字用于声明一个在其他文件中定义的变量。
 
 // ----------- timer -----------
 

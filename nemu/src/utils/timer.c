@@ -23,8 +23,10 @@ IFDEF(CONFIG_TIMER_CLOCK_GETTIME,
 
 static uint64_t boot_time = 0;
 
-static uint64_t get_time_internal() {
-#if defined(CONFIG_TARGET_AM)
+//static：该关键字表示函数具有内部链接，这意味着它只能在同一个翻译单元（源文件）中被调用。
+static uint64_t get_time_internal() //获取当前时间（以微秒为单位）
+{
+#if defined(CONFIG_TARGET_AM)//IF Application on Abstract-Machine
   uint64_t us = io_read(AM_TIMER_UPTIME).us;
 #elif defined(CONFIG_TIMER_GETTIMEOFDAY)
   struct timeval now;
@@ -32,8 +34,9 @@ static uint64_t get_time_internal() {
   uint64_t us = now.tv_sec * 1000000 + now.tv_usec;
 #else
   struct timespec now;
-  clock_gettime(CLOCK_MONOTONIC_COARSE, &now);
-  uint64_t us = now.tv_sec * 1000000 + now.tv_nsec / 1000;
+  clock_gettime(CLOCK_MONOTONIC_COARSE, &now);//The functions clock_gettime() retrieve  the time of the specified clock clockid.
+  //CLOCK_MONOTONIC_COARSE： 系统运行时间，从系统启动时开始计时，速度更快精度更低，系统休眠时不再计时（NTP与硬件时钟有问题时会影响其频率，没有验证过）。
+  uint64_t us = now.tv_sec * 1000000 + now.tv_nsec / 1000;//将秒转换为微秒，将纳秒转换为微秒
 #endif
   return us;
 }
@@ -45,7 +48,7 @@ uint64_t get_time() {
 }
 
 void init_rand() {
-  srand(get_time_internal());
+  srand(get_time_internal());//由函数 rand 使用的随机数发生器。；；参数：seed -- 这是一个整型值，用于伪随机数生成算法播种。
   //  The srand() function sets its argument as the seed for  a  new  sequence  of
   //  pseudo-random  integers  to  be returned by rand().  These sequences are re‐
   //  peatable by calling srand() with the same seed value.

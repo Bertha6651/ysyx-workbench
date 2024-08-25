@@ -20,9 +20,10 @@ void am_init_monitor();
 void engine_start();
 int is_exit_status_bad();
 
-int main(int argc, char *argv[]) {
-  /* Initialize the monitor. */
-#ifdef CONFIG_TARGET_AM
+int main(int argc, char *argv[]) 
+{
+  /* Initialize the monitor. */ //监控客户计算机的运行状态+调试功能
+#ifdef CONFIG_TARGET_AM//IF Application on Abstract-Machine
   am_init_monitor();
 #else
   init_monitor(argc, argv);

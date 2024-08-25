@@ -24,12 +24,14 @@ static uint8_t *pmem = NULL;
 static uint8_t pmem[CONFIG_MSIZE] PG_ALIGN = {};
 #endif
 
-uint8_t* guest_to_host(paddr_t paddr) { return pmem + paddr - CONFIG_MBASE; }
+uint8_t* guest_to_host(paddr_t paddr)//将一个物理地址 (paddr_t paddr) 从 "来宾" 地址空间转换为 "主机" 地址空间的指针。
+//表示返回一个指向 8 位无符号整数的指针
+ { return pmem + paddr - CONFIG_MBASE; }
   //  An  unsigned integer type of a fixed width of exactly N bits, N being
   // the value specified in its type name.  According to  the  C  language
   // standard,  they  shall  be capable of storing values in the range 
   // [0,UINTN_MAX], substituting N by the appropriate number.
-paddr_t host_to_guest(uint8_t *haddr) { return haddr - pmem + CONFIG_MBASE; }
+paddr_t host_to_guest(uint8_t *haddr) { return haddr - pmem + CONFIG_MBASE; }//CONFIG_MBASE:物理地址空间的起始位置
 
 static word_t pmem_read(paddr_t addr, int len) {
   word_t ret = host_read(guest_to_host(addr), len);
@@ -50,7 +52,7 @@ void init_mem() {
   pmem = malloc(CONFIG_MSIZE);
   assert(pmem);
 #endif
-  IFDEF(CONFIG_MEM_RANDOM, memset(pmem, rand(), CONFIG_MSIZE));
+  IFDEF(CONFIG_MEM_RANDOM, memset(pmem, rand(), CONFIG_MSIZE));//这里很懵，这个宏好多啊
   Log("physical memory area [" FMT_PADDR ", " FMT_PADDR "]", PMEM_LEFT, PMEM_RIGHT);
 }
 
