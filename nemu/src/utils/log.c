@@ -15,7 +15,7 @@
 
 #include <common.h>
 
-extern uint64_t g_nr_guest_inst;
+extern uint64_t g_nr_guest_inst;//记录指令条数
 
 #ifndef CONFIG_TARGET_AM
 FILE *log_fp = NULL;

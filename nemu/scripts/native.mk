@@ -22,8 +22,8 @@ include $(NEMU_HOME)/tools/difftest.mk
 # 	$(call git_commit, "compile NEMU")
 # $(BINARY):: compile_git
 compile_git:
-	$(call git_commit, "修改welcome，使run正常运行 compile NEMU")
 $(BINARY):: compile_git
+
 # Some convenient rules
 
 override ARGS ?= --log=$(BUILD_DIR)/nemu-log.txt

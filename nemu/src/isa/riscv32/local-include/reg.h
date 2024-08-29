@@ -18,16 +18,25 @@
 
 #include <common.h>
 
-static inline int check_reg_idx(int idx) {
+static inline int check_reg_idx(int idx) //检查寄存器的id是否有错
+{
   IFDEF(CONFIG_RT_CHECK, assert(idx >= 0 && idx < MUXDEF(CONFIG_RVE, 16, 32)));
   return idx;
 }
 
 #define gpr(idx) (cpu.gpr[check_reg_idx(idx)])
 
-static inline const char* reg_name(int idx) {
+/*const char *regs[] = {
+  "$0", "ra", "sp", "gp", "tp", "t0", "t1", "t2",
+  "s0", "s1", "a0", "a1", "a2", "a3", "a4", "a5",
+  "a6", "a7", "s2", "s3", "s4", "s5", "s6", "s7",
+  "s8", "s9", "s10", "s11", "t3", "t4", "t5", "t6"
+};*/
+
+static inline const char* reg_name(int idx) 
+{
   extern const char* regs[];
-  return regs[check_reg_idx(idx)];
+  return regs[check_reg_idx(idx)];//返回regs[idx]，检查过的
 }
 
 #endif

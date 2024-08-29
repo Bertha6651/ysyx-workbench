@@ -17,6 +17,8 @@
 #include <cpu/cpu.h>
 #include <readline/readline.h>
 #include <readline/history.h>
+#include <stdio.h>  
+#include <stdlib.h>  
 #include "sdb.h"
 #include <utils.h>
 
@@ -25,6 +27,9 @@ static int is_batch_mode = false;
 
 void init_regex();
 void init_wp_pool();
+void wp_pool_display();
+
+
 
 /* We use the `readline' library to provide more flexibility to read from stdin. */
 /* readline():Read a line of input.  Prompt with PROMPT.  A NULL PROMPT means none. 
@@ -58,28 +63,93 @@ static int cmd_c(char *args) {
 
 static int cmd_q(char *args) 
 {
-  nemu_state.state=NEMU_QUIT;
+  nemu_state.state=NEMU_QUIT;//8_25 退出时记得要改变状态
   return -1;
 }
 
 static int cmd_help(char *args);
 
-static struct {
-  const char *name;
-  const char *description;
-  int (*handler) (char *);
-} cmd_table [] = {
-  { "help", "Display information about all supported commands", cmd_help },
-  { "c", "Continue the execution of the program", cmd_c },
-  { "q", "Exit NEMU", cmd_q },
+static int cmd_si(char *args){
+  char *arg = strtok(NULL, " ");
+  int Num;
+  if (arg == NULL){
+    cpu_exec(1);
+  }else {
+      int n = sscanf(args, "%d", &Num);  
+       if (n == 1) {  
+        printf("successfully obtained the integer: %d\n", Num);  
+        cpu_exec(Num);
+      } else {  
+        printf("Incorrect input format, please enter again. \tReference format: si [N]");  
+        return 0;
+      }  
+      return 0;
+  }
+  return 0;
+}
 
-  /* TODO: Add more commands */
+static int cmd_info(char *args){
+  char *arg = strtok(NULL, " ");
+  if(arg==NULL)
+  {
+    printf("Incorrect input format, please enter again.\n");  
+    printf("Reference format: info SUBCMD\n\tinfo r: Print the state of registers\n\tinfo w: watchpoint information.\n");  
+    return 0;  
+  }
+  else if (strcmp(arg, "r") == 0){
+    isa_reg_display();
+    return 0;
+  } 
+  else if (strcmp(arg,"w")==0){
+    
+    return 0;
 
-};
+  }
+  else{
+    printf("Incorrect input format, please enter again.\n");  
+    printf("Reference format: info SUBCMD\n\tinfo r: Print the state of registers\n\tinfo w: watchpoint information.\n");  
+    return 0;  
+  }
+  return 0;
+}
 
-#define NR_CMD ARRLEN(cmd_table)
+static int cmd_x(char *args){
+return 0;
+}
 
-static int cmd_help(char *args) {
+static int cmd_p(char *args){
+return 0;
+}
+
+static int cmd_w(char *args){
+return 0;
+}
+
+static int cmd_d(char *args){
+return 0;
+}
+static struct {  
+  const char *name;  
+  const char *description;  
+  int (*handler) (char *);  //这是一个指向函数的指针，函数返回类型为 int，接受一个 char * 类型的参数。
+} cmd_table [] = {  
+  { "help", "Display information about all supported commands", cmd_help },  
+  { "c", "Continue the execution of the paused program", cmd_c },  
+  { "q", "Exit NEMU", cmd_q },  
+  { "si", "Execute the program one step at a time for N instructions,pausing after, \n     defaulting to 1 if N is not provided.", cmd_si },  
+  { "info", "Print the state of registers and watchpoint information", cmd_info }, // Assuming cmd_info exists  
+  { "x", "Evaluate the expression EXPR to get the starting memory address and \n    output N consecutive 4-byte values in hexadecimal.", cmd_x }, // Assuming cmd_x exists  
+  { "p", "Calculate the value of the expression EXPR; \n    supported operations are described in the expression evaluation section of debugging.", cmd_p }, // Assuming cmd_p exists  
+  { "w", "Pause program execution when the value of the expression EXPR changes.", cmd_w }, // Assuming cmd_w exists  
+  { "d", "Delete the watchpoint with index N.", cmd_d } // Assuming cmd_d exists  
+  /* TODO: Add more commands if necessary */  
+};  
+
+
+#define NR_CMD ARRLEN(cmd_table)//#define ARRLEN(arr) (int)(sizeof(arr) / sizeof(arr[0]))cmd_table的个数
+
+static int cmd_help(char *args) 
+{
   /* extract the first argument */
   char *arg = strtok(NULL, " ");
   int i;
@@ -106,14 +176,15 @@ void sdb_set_batch_mode() {
   is_batch_mode = true;
 }
 
-void sdb_mainloop() {
+void sdb_mainloop() 
+{
   if (is_batch_mode) //batch：批处理
   {
     cmd_c(NULL);
     return;
   }
 
-  for (char *str; (str = rl_gets()) != NULL; ) //rl_gets获取输入的一行，指到获取完所有行
+  for (char *str; (str = rl_gets()) != NULL; ) //rl_gets获取输入的一行，直到获取完所有行
   {
     char *str_end = str + strlen(str);//将这个指针指到最后
 
@@ -169,4 +240,9 @@ void init_sdb() {
 
   /* Initialize the watchpoint pool. */
   init_wp_pool();//初始化一个监视点池
+}
+
+void wp_pool_display()
+{
+  
 }

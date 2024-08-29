@@ -70,6 +70,7 @@ static long load_img()//这个函数会将一个有意义的客户程序从镜�
 //The ftell() function obtains the current value of the file position indicator for the stream pointed to by stream.
 
   Log("The image is %s, size = %ld", img_file, size);
+  printf("The image is %s, size = %ld", img_file, size);
 
   fseek(fp, 0, SEEK_SET);//#define SEEK_SET	0	/* Seek from beginning of file.  */移动到搜捕
   int ret = fread(guest_to_host(RESET_VECTOR), size, 1, fp);//对RESET_VECTOR理解不够//这里应该是核心部分

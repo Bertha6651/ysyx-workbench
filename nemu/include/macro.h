@@ -29,19 +29,19 @@
 #define ARRLEN(arr) (int)(sizeof(arr) / sizeof(arr[0]))
 
 // macro concatenation
-#define concat_temp(x, y) x ## y
-#define concat(x, y) concat_temp(x, y)
+#define concat_temp(x, y) x ## y//##运算符 将两个宏参数 x 和 y 直接拼接起来，形成一个新的标识符
+#define concat(x, y) concat_temp(x, y)//调用concat_temp宏，宏定义中实现标识符的拼接，同时能够避免宏展开的直接拼接出现的问题
 #define concat3(x, y, z) concat(concat(x, y), z)
 #define concat4(x, y, z, w) concat3(concat(x, y), z, w)
 #define concat5(x, y, z, v, w) concat4(concat(x, y), z, v, w)
 
 // macro testing
 // See https://stackoverflow.com/questions/26099745/test-if-preprocessor-symbol-is-defined-inside-macro
-#define CHOOSE2nd(a, b, ...) b
-#define MUX_WITH_COMMA(contain_comma, a, b) CHOOSE2nd(contain_comma a, b)
-#define MUX_MACRO_PROPERTY(p, macro, a, b) MUX_WITH_COMMA(concat(p, macro), a, b)
+#define CHOOSE2nd(a, b, ...) b//这个宏定义用于选择第二个参数 b。它实际上可以忽略第一个参数 a 和可变参数 ...，直接返回 b
+#define MUX_WITH_COMMA(contain_comma, a, b) CHOOSE2nd(contain_comma a, b)//这个宏的作用是检测 contain_comma 是否包含逗号，并据此选择第二个参数 b。
+#define MUX_MACRO_PROPERTY(p, macro, a, b) MUX_WITH_COMMA(concat(p, macro), a, b)//如果 macro 定义了且结果带有逗号，则会最终选择参数 a，否则返回 b。
 // define placeholders for some property
-#define __P_DEF_0  X,
+#define __P_DEF_0  X,//注意啊这后面有个逗号
 #define __P_DEF_1  X,
 #define __P_ONE_1  X,
 #define __P_ZERO_0 X,

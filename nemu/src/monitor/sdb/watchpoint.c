@@ -28,11 +28,13 @@ typedef struct watchpoint {
 static WP wp_pool[NR_WP] = {};
 static WP *head = NULL, *free_ = NULL;
 
-void init_wp_pool() {
+void init_wp_pool() 
+{
   int i;
   for (i = 0; i < NR_WP; i ++) {
+  // #define NR_WP 32
     wp_pool[i].NO = i;//初始化编号
-    wp_pool[i].next = (i == NR_WP - 1 ? NULL : &wp_pool[i + 1]);
+    wp_pool[i].next = (i == NR_WP - 1 ? NULL : &wp_pool[i + 1]);//如果i=31，下一个指令为空，否则指向wp_pool[i-1],链表结构
   }
 
   head = NULL;

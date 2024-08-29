@@ -34,12 +34,18 @@ void device_update();
 
 static void trace_and_difftest(Decode *_this, vaddr_t dnpc) {
 #ifdef CONFIG_ITRACE_COND
-  if (ITRACE_COND) { log_write("%s\n", _this->logbuf); }
+  if (ITRACE_COND) { log_write("%s\n", _this->logbuf); }//将这些内容写入日志
 #endif
-  if (g_print_step) { IFDEF(CONFIG_ITRACE, puts(_this->logbuf)); }
+  if (g_print_step) { IFDEF(CONFIG_ITRACE, puts(_this->logbuf)); }//根据g_print_step与CONFIG_ITRACE，确定是否打印_this->logbuf
   IFDEF(CONFIG_DIFFTEST, difftest_step(_this->pc, dnpc));//static inline void difftest_step(vaddr_t pc, vaddr_t npc) {}
 }
 
+/*typedef struct Decode {
+  vaddr_t pc;
+  vaddr_t snpc; // static next pc
+  vaddr_t dnpc; // dynamic next pc
+  ISADecodeInfo isa;
+  IFDEF(CONFIG_ITRACE, char logbuf[128]);*/
 static void exec_once(Decode *s, vaddr_t pc) 
 {
   s->pc = pc;
@@ -49,17 +55,23 @@ static void exec_once(Decode *s, vaddr_t pc)
 #ifdef CONFIG_ITRACE
   char *p = s->logbuf;
   p += snprintf(p, sizeof(s->logbuf), FMT_WORD ":", s->pc);
+  printf("SWT_WORD:%s\ns->ps:%x\n",FMT_WORD":",s->pc);
 // int snprintf(char *str, size_t size, const char *format, ...);
 //用于格式化输出字符串，并将结果写入到指定的缓冲区，与 sprintf() 不同的是，snprintf() 会限制输出的字符数，避免缓冲区溢出。
   int ilen = s->snpc - s->pc;//下一指令地址和当前指令地址的差值(指令长度)
   int i;
   uint8_t *inst = (uint8_t *)&s->isa.inst.val;//有点困惑，好像是获取当前指令的指针
+   printf("s->isa.inst.val: 0x%X\n", s->isa.inst.val);  
+
   for (i = ilen - 1; i >= 0; i --) 
   {
     p += snprintf(p, 4, " %02x", inst[i]);//将指令的字节格式化为十六进制字符串并写入日志缓冲区。
+    printf("inst[%d]:%X\n",i,inst[i]);
   }
   int ilen_max = MUXDEF(CONFIG_ISA_x86, 8, 4);
+  printf("ilen_max:%d\n",ilen_max);
   int space_len = ilen_max - ilen;
+  printf("space_len:%d\n",space_len);
   if (space_len < 0) space_len = 0;
   space_len = space_len * 3 + 1;
   memset(p, ' ', space_len);//用空格填充日志缓冲区中的空白区域。
@@ -69,6 +81,9 @@ static void exec_once(Decode *s, vaddr_t pc)
   void disassemble(char *str, int size, uint64_t pc, uint8_t *code, int nbyte);//调用反汇编函数，将指令的机器码翻译为汇编语言，并写入日志。
   disassemble(p, s->logbuf + sizeof(s->logbuf) - p,
       MUXDEF(CONFIG_ISA_x86, s->snpc, s->pc), (uint8_t *)&s->isa.inst.val, ilen);
+      printf("s->snpc:%x\ns->pc:%x\n",s->snpc,s->pc);
+      printf("MUXDEF(CONFIG_ISA_x86, s->snpc, s->pc):%x\n",MUXDEF(CONFIG_ISA_x86, s->snpc, s->pc));
+      printf("&s->isa.inst.val:0x%X\nilen:%x\n",s->isa.inst.val,ilen);
 #else
   p[0] = '\0'; // the upstream llvm does not support loongarch32r
 #endif
@@ -105,7 +120,8 @@ static void execute(uint64_t n) {
   }
 }
 
-static void statistic() {
+static void statistic() 
+{
   IFNDEF(CONFIG_TARGET_AM, setlocale(LC_NUMERIC, ""));//这里还有问题
 #define NUMBERIC_FMT MUXDEF(CONFIG_TARGET_AM, "%", "%'") PRIu64
   Log("host time spent = " NUMBERIC_FMT " us", g_timer);

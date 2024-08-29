@@ -56,6 +56,19 @@ uint64_t get_time();
 
 #define ANSI_FMT(str, fmt) fmt str ANSI_NONE
 
+//用于向日志文件写入信息
+/*可变参数， 
+__VA_ARGS__ 用于替代传入的参数
+bool log_enable() {
+  return MUXDEF(CONFIG_TRACE, (g_nr_guest_inst >= CONFIG_TRACE_START) &&
+         (g_nr_guest_inst <= CONFIG_TRACE_END), false);
+
+fprintf()用于文件操作
+  int fprintf( FILE *stream, const char *format, ... );
+fflush(log_fp);：确保在写入后立即将缓冲区的数据刷新到文件，使日志内容及时可见。
+
+
+}*/
 #define log_write(...) IFDEF(CONFIG_TARGET_NATIVE_ELF, \
   do { \
     extern FILE* log_fp; \
