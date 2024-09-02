@@ -165,7 +165,7 @@ static bool make_token(char *e)
         char *substr_start = e + position;
         int substr_len = pmatch.rm_eo; // 开始位置rm_so是0，这自然结束位置就是这段长度了
 
-        Log("match rules[%d] = \"%s\" at position %d with len %d: %.*s",
+        printf("match rules[%d] = \"%s\" at position %d with len %d: %.*s",
             i, rules[i].regex, position, substr_len, substr_len, substr_start);
         // rules号，rules的情况   ，到字符的位置，匹配长度    ，匹配长度   ，匹配的字符
         position += substr_len; // 指针开始移动到下一个匹配字符的首部了
