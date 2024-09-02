@@ -22,7 +22,6 @@
 #include <stdbool.h>
 #include <regex.h>
 
-#include "expr.h"
 // #include <include/utils.h>
 // #include <isa.h>
 // #include <cpu/cpu.h>
@@ -160,14 +159,17 @@ static bool make_token(char *e)
   regmatch_t pmatch; // 这个结构体主要是用来储存匹配文本串在目标串中的开始位置和存放结束位置
 
   nr_token = 0; // 显示已经识别出的token数目
-
+  printf("e:%s\n",e);
   while (e[position] != '\0')
   {
     /* Try all rules one by one. */
     for (i = 0; i < NR_REGEX; i++) // 按照顺序匹配rules
     {
+      printf("%d\n",i);
+      printf("e + position:%s\n",e + position);
       if (regexec(&re[i], e + position, 1, &pmatch, 0) == 0 && pmatch.rm_so == 0) // rm_so是开始的位置
       {
+        printf("0%d\n",i);
         char *substr_start = e + position;
         int substr_len = pmatch.rm_eo; // 开始位置rm_so是0，这自然结束位置就是这段长度了
 
@@ -180,7 +182,7 @@ static bool make_token(char *e)
          * to record the token in the array `tokens'. For certain types
          * of tokens, some extra actions should be performed.
          */
-
+        
         switch (rules[i].token_type)
         {
         case TK_NOTYPE:
@@ -371,6 +373,7 @@ uint32_t eval(int p, int q, bool *success)
 
 int expr(char *e, bool *success)
 {
+  printf("inter expr\n");
   if (!make_token(e))
   {
     *success = false;
@@ -424,15 +427,24 @@ uint32_t choose(uint32_t n)
 }
 static void check_div_zero(char *exp)  
 {
-  char *pos = strtok(exp, "/");
+  printf("buf:%s\n",exp);
+  char *pos =strchr(exp, '/');  
   if (pos == NULL)
   {
     printf("there is zero /\n");
   }
-  for (; pos == NULL; pos = strtok(NULL, "/"))
+  int time=0;
+  
+  
+  for (;pos != NULL; pos = strchr(exp, '/'))
   {
+    if(exp!=NULL && pos !=NULL){
+    printf("exp:%s\n",exp);
+     printf("pos:%s\n",pos);
+    }
     const char *start = pos;
     start++;
+    printf("start:%s\n",start);
     const char *end = start;
     int count = 0;
     // 逐字符检查，直到遇到下一个运算符
@@ -441,36 +453,43 @@ static void check_div_zero(char *exp)
       if (*end == '(')
       {
         count++; // 进入括号
+        printf("count:%d\n",count);
+
       }
-      
+      // /(((23)/45)))
       else if ((strchr("+-*/()", *end) != NULL) && count == 0)
       {
+        printf("stop\n");
         break; // 遇到运算符并且不在括号内，停止
       }
       else if (*end == ')')
       {
         count--; // 退出括号
+        printf("count:%d\n",count);
       }
       end++;
     }
     // 提取从start到end之间的字符串
+    printf("end:%s\n",end);
     size_t length = end - start;
 
     // printf("the length before '/' is %d\n", length);
     char *beforeStr = (char *)malloc(length + 1);
     strncpy(beforeStr, start, length);
     beforeStr[length] = '\0';
+  printf("before_str is %s\n",beforeStr);
 
   bool variable = true;  // 布尔变量
   bool* ifSuccess = &variable;  // 布尔指针指向布尔变量
   int result= expr(beforeStr, ifSuccess);
-  
     if (result == 0)
     {
       char *temp = pos + length + 1;
       memmove(pos, temp, strlen(temp) + 1);
+      time++;
     }
   }
+  printf("cancel dive_zero %d\n",time);
   printf("after check_div_zero: %s\n",exp);
 
 }
@@ -543,7 +562,7 @@ static void gen(char a)
     printf("表达式错误或者程序错误\n");
   }
   return 0;*/
-static void gen_rand_expr()
+__attribute__((unused)) static void gen_rand_expr()
 {
   int length = strlen(buf);
 
@@ -612,7 +631,10 @@ int main(int argc, char *argv[])
   for (i = 0; i < loop; i++)
   {
     clear_buffer();
-    gen_rand_expr();
+    // gen_rand_expr();
+    clear_buffer();
+    strcat(buf, "(423-34)/(((3/2))*3)+34/23");
+    printf("buf:%s\n",buf);
     check_div_zero(buf);
     sprintf(code_buf, code_format, buf); // 把code_format(buf)保存到code_buf中
 

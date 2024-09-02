@@ -158,6 +158,7 @@ static bool make_token(char *e)
     /* Try all rules one by one. */
     for (i = 0; i < NR_REGEX; i++) // 按照顺序匹配rules
     {
+      printf("e + position:%s\n",e + position);
       if (regexec(&re[i], e + position, 1, &pmatch, 0) == 0 && pmatch.rm_so == 0) // rm_so是开始的位置
       {
         char *substr_start = e + position;
