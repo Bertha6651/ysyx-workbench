@@ -19,6 +19,8 @@
  * Type 'man regex' for more information about POSIX regex functions.
  */
 #include <regex.h>
+#include <stdbool.h>
+#include "expr.h"
 
 enum
 {
@@ -64,9 +66,9 @@ static struct rule
     {"\\$[a-zA-Z][0-9]", TK_REG},      // 寄存器，如 $a0, $t1, etc.
     {"[a-zA-Z_][a-zA-Z0-9_]*", TK_ID}, // 标识符如 `number`)
 };
-
+#define ARRLEN(arr) (int)(sizeof(arr) / sizeof(arr[0]))
 #define NR_REGEX ARRLEN(rules)
-// #define ARRLEN(arr) (int)(sizeof(arr) / sizeof(arr[0]))
+
 // 求的是rules的条数
 
 static regex_t re[NR_REGEX] = {};
@@ -131,7 +133,7 @@ void init_regex() // 初始化正则表达式（regex）并编译,初始化的�
     if (ret != 0)
     {
       regerror(ret, &re[i], error_msg, 128);
-      panic("regex compilation failed: %s\n%s", error_msg, rules[i].regex); // 调用 panic() 输出错误信息。
+      printf("regex compilation failed: %s\n%s", error_msg, rules[i].regex); 
     }
   }
 }
@@ -361,7 +363,7 @@ uint32_t eval(int p, int q, bool *success)
   }
 }
 
-word_t expr(char *e, bool *success)
+int expr(char *e, bool *success)
 {
   if (!make_token(e))
   {

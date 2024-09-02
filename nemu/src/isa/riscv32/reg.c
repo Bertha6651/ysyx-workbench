@@ -27,7 +27,7 @@ void isa_reg_display() {
     for (int i = 0; i < 32; i++) 
     {
     /* 打印寄存器名称和内容 */
-    printf("id_%d:reg_name %s\t%x\n", i, reg_name(i), gpr(i));
+    printf("id_%d:reg_name %s\t0x%x\n", i, reg_name(i), gpr(i));
     if((i+1)%4==0)  printf("\n");
     }
     /* pc 寄存器 */

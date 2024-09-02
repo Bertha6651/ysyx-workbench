@@ -23,6 +23,7 @@
 #include <utils.h>
 
 
+
 static int is_batch_mode = false;
 
 void init_regex();
@@ -114,11 +115,33 @@ static int cmd_info(char *args){
 }
 
 static int cmd_x(char *args){
+  char *N = strtok(NULL, " ");
+  int Num;
+  int n = sscanf(N, "%d", &Num);
+  if (n != 1) {  
+    printf("Incorrect input format, please enter again. \tReference format: si [N]");  
+    return 0;
+  }   
+  printf("N:%d\n",Num);
+  char *EXPR = strtok(NULL, " ");
+  printf("EXPR:%s\n",EXPR);
 return 0;
 }
 
 static int cmd_p(char *args){
-return 0;
+  char *EXPR=args;
+  printf("%s\n",EXPR);
+  //这里之前遇到一点bug
+  bool variable = true;  // 布尔变量
+  bool* ifSuccess = &variable;  // 布尔指针指向布尔变量
+  
+  expr(EXPR, ifSuccess);
+
+  if(!ifSuccess)
+  {
+    printf("表达式错误或者程序错误\n");
+  }
+  return 0;
 }
 
 static int cmd_w(char *args){

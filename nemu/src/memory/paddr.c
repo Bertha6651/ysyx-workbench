@@ -21,6 +21,8 @@
 #if   defined(CONFIG_PMEM_MALLOC)
 static uint8_t *pmem = NULL;
 #else // CONFIG_PMEM_GARRAY
+//#define CONFIG_MSIZE 0x8000000
+
 static uint8_t pmem[CONFIG_MSIZE] PG_ALIGN = {};
 #endif
 
