@@ -149,7 +149,7 @@ typedef struct token
   char str[32]; // 记录token相应的子串，如十进制数的值
 } Token;
 
-static Token tokens[1024] __attribute__((used)) = {}; // tokens数组用于按顺序存放已经被识别出的token信息
+static Token tokens[2024] __attribute__((used)) = {}; // tokens数组用于按顺序存放已经被识别出的token信息
 static int nr_token __attribute__((used)) = 0;      // 指示已经被识别出的token数目
 
 static bool make_token(char *e)
@@ -338,13 +338,13 @@ uint32_t eval(int p, int q, bool *success)
   }
   else if (check_parentheses(p, q) == true) // 括号匹配处理
   {
-    printf("check_parenthese success\n");
+    // printf("check_parenthese success\n");
     return eval(p + 1, q - 1, success);
   }
   else // 这里主要是处理更复杂的情况，比如说第三种、第五种
   {
     int op = find_main_operator(p, q);
-    printf("op:%d\t tokens[op].type:%d\n", op, tokens[op].type);
+    // printf("op:%d\t tokens[op].type:%d\n", op, tokens[op].type);
     uint32_t val1 = eval(p, op - 1, success);
     // printf("val1:%d\n", val1);
     uint32_t val2 = eval(op + 1, q, success);
@@ -424,6 +424,7 @@ uint32_t choose(uint32_t n)
   }
   return rand() % n; // 生成一个小于 n 的随机数
 }
+
 static void check_div_zero(char *exp)
 {
   printf("buf:%s\n", exp);
@@ -442,6 +443,7 @@ static void check_div_zero(char *exp)
       printf("\nreplace:%s\n", replace);
       printf("pos:%s\n", pos);
     }
+    
     const char *start = pos;
     start++;
     printf("start:%s\n", start);
@@ -450,7 +452,10 @@ static void check_div_zero(char *exp)
     // 逐字符检查，直到遇到下一个运算符
     while (*end)
     {
-      if (*end == '(')
+      if(*end ==' ')
+      {
+      }
+      else if (*end == '(')
       {
         count++; // 进入括号
         // printf("count:%d\n",count);
@@ -481,13 +486,14 @@ static void check_div_zero(char *exp)
     bool variable = true;        // 布尔变量
     bool *ifSuccess = &variable; // 布尔指针指向布尔变量
     int result = expr(beforeStr, ifSuccess);
-    if (result == 0 && *ifSuccess == true)
 
+    if (result == 0 && *ifSuccess == false)
     {
       char *temp = pos + length + 1;
       memmove(pos, temp, strlen(temp) + 1);
       time++;
       replace = pos;
+      printf("Successfully removed the zero portion.\n");
     }
     else
     {
@@ -496,9 +502,24 @@ static void check_div_zero(char *exp)
     printf("success\n");
   }
   printf("\ncancel dive_zero %d\n", time);
-  printf("after check_div_zero: %s\n", exp);
+  printf("after check_div_zero: %s\n\n", exp);
 }
 
+static void gen_rand_space()
+{
+  switch (choose(4))
+  {
+  case 0:
+    int loop = choose(2);
+    for (int i = 0; i <= loop; i++) // 不定长度的空格
+    {
+      strcat(buf, " ");
+    }
+    break;
+  default:
+    break;
+  }
+}
 static void gen_num()
 {
   int length = strlen(buf);
@@ -511,27 +532,16 @@ static void gen_num()
   }
   char temp[20];
   sprintf(temp, "%d", num);
+  gen_rand_space();
   strcat(buf, temp);
 }
 
-__attribute__((unused)) static void gen_rand_space()
-{
-  switch (choose(2))
-  {
-  case 0:
-    int loop = choose(5);
-    for (int i = 0; i <= loop; i++) // 不定长度的空格
-    {
-      strcat(buf, " ");
-    }
-    break;
-  default:
-    break;
-  }
-}
+// __attribute__((unused)) 
+
 static void gen_rand_op()
 {
-  // gen_rand_space();
+  
+  gen_rand_space();
   switch (choose(4))
   {
   case 0:
@@ -549,7 +559,7 @@ static void gen_rand_op()
   default:
     break;
   }
-  // gen_rand_space();
+  gen_rand_space();
 }
 
 static void gen(char a)
@@ -570,7 +580,7 @@ static void gen(char a)
 static void gen_rand_expr()
 {
   int length = (int)strlen(buf);
-  if (length <= 1024)
+  if (length <= 256)
   {
     switch (choose(6))
     {
@@ -599,6 +609,7 @@ static void gen_rand_expr()
       gen(')');
       break;
     default:
+      
       gen_rand_expr();
 
       gen_rand_op();
@@ -646,7 +657,12 @@ int main(int argc, char *argv[])
 
     // strcat(buf, "(423-34)/(((3/4))/5)+34/23*1234*(132+4/56*443)");
     check_div_zero(buf);
-    sprintf(code_buf, code_format, buf); // 把code_format(buf)保存到code_buf中
+    bool variable = true;  // 布尔变量
+    bool* ifSuccess = &variable;  // 布尔指针指向布尔变量
+    char result_char[20];
+    int result_int=expr(buf,ifSuccess);
+    sprintf(result_char, "%d", result_int); 
+    sprintf(code_buf, code_format, buf,result_char); // 把code_format(buf)保存到code_buf中
 
     FILE *fp = fopen("/tmp/.code.c", "w");
     assert(fp != NULL);

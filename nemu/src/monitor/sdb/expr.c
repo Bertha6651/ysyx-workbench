@@ -142,7 +142,7 @@ typedef struct token
   char str[32]; // 记录token相应的子串，如十进制数的值
 } Token;
 
-static Token tokens[32] __attribute__((used)) = {}; // tokens数组用于按顺序存放已经被识别出的token信息
+static Token tokens[22024] __attribute__((used)) = {}; // tokens数组用于按顺序存放已经被识别出的token信息
 static int nr_token __attribute__((used)) = 0;      // 指示已经被识别出的token数目
 
 static bool make_token(char *e)
@@ -158,7 +158,7 @@ static bool make_token(char *e)
     /* Try all rules one by one. */
     for (i = 0; i < NR_REGEX; i++) // 按照顺序匹配rules
     {
-      printf("e + position:%s\n",e + position);
+      // printf("e + position:%s\n",e + position);
 
       if (regexec(&re[i], e + position, 1, &pmatch, 0) == 0 && pmatch.rm_so == 0) // rm_so是开始的位置
       {

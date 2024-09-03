@@ -38,10 +38,8 @@ run-env: $(BINARY) $(DIFF_REF_SO)
 # run: run-env
 # 	$(call git_commit, "run NEMU")
 # 	$(NEMU_EXEC)
-
 run: run-env
-	$(call git_commit, "PA1:第一阶段+第二阶段部分（gen_expr）调试中")
-
+	$(call git_commit, "gen_expr基本完成")
 	$(NEMU_EXEC)
 
 gdb: run-env
