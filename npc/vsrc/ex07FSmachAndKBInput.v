@@ -13,7 +13,6 @@ module ex07FSmachAndKBInput (
   reg [7:0] ps2_out;
   reg [23:0] ps2_in ;
 
- // ------------------------------------------------------------
     // 键盘控制器
   ps2_keyboard ps2keyboard(.clk(clk),
                            .clrn(~rst), //低电平复位
@@ -25,17 +24,16 @@ module ex07FSmachAndKBInput (
                            .overflow(overFlow)
                           );
 
- // ------------------------------------------------------------
 
 
 
- // ------------------------------------------------------------
     // 三段式状态机部分
 
   parameter s01Read = 4'b0001;
   parameter s02Finish01 = 4'b0010; //拉低nextdata_n,通知读取完毕
   parameter s03Finish02 = 4'b0100;//拉低nextdata_n,通知读取完毕
   parameter s04Iitn = 4'b1000;
+
 
   reg [3:0] state_current,state_next;
   //状态机第一段
@@ -80,11 +78,9 @@ module ex07FSmachAndKBInput (
     endcase
   end
 
- // ------------------------------------------------------------
 
 
 
-//  // ------------------------------------------------------------
 
 
 //   always @(*)
@@ -101,7 +97,6 @@ module ex07FSmachAndKBInput (
 
 //   end
 
-//  // ------------------------------------------------------------
 
 // always @(*)
 // begin
@@ -204,7 +199,6 @@ always @(posedge clk or negedge rst) begin
     end
 end
 
- // ------------------------------------------------------------
   // 记录按下键盘的次数
   reg [3:0] count [2:0];
 
@@ -227,11 +221,9 @@ end
     end
   end
 
- // ------------------------------------------------------------
   
 
 
- // ------------------------------------------------------------
   // 七段LED数码管显示 
   
     //扫描码显示
@@ -256,13 +248,12 @@ end
   bcd15segIfrst segNum02 (.in(count[1]), .out(seg32),.en(1'd1));
   bcd15segIfrst segNum03 (.in(count[2]), .out(seg33),.en(1'd1));
 
- // ------------------------------------------------------------
 
 
 endmodule
 
 
-module bcd15segIfrst(  
+module bcd15segIfrst(  //这里主要是加了一个复位功能
   input  [3:0] in,  
   input  en,
   output reg [7:0] out  
@@ -314,7 +305,7 @@ endmodule
 // endmodule
 
 
-module ScantoASCII (
+module ScantoASCII (//Scan码对应ASCII
     input [7:0] addr,
     input shift,
     output reg [7:0] val
@@ -434,7 +425,7 @@ endmodule
 
 
 module ps2_keyboard(clk,clrn,ps2_clk,ps2_data,data,
-                    ready,nextdata_n,overflow);
+                    ready,nextdata_n,overflow);//这里是键盘处理部分
     input clk,clrn,ps2_clk,ps2_data;
     input nextdata_n;
     output [7:0] data;

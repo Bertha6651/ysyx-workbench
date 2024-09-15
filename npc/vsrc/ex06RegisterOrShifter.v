@@ -21,13 +21,14 @@ endmodule
 
 // endmodule
 
-module radomNumGenerator (
+module radomNumGenerator //生成随机数
+(
     input clk,
     output reg [7:0] radom,
     output [7:0] seg01,seg02
 ) ;
     wire temp;
-    assign temp=radom[4]^radom[3]^radom[2]^radom[0];
+    assign temp=radom[4]^radom[3]^radom[2]^radom[0];//这里的思路是直接参考的讲义上的
     always @(posedge clk) begin
         if(radom==8'b0) begin
             radom<=8'b1;
@@ -49,7 +50,8 @@ endmodule
 
 
 
-module bcd15seg(  
+module bcd15seg//打印16进制数
+(  
   input  [3:0] b,  
   output reg [7:0] h  
 );  

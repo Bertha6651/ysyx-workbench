@@ -386,7 +386,7 @@ int expr(char *e, bool *success)
   // TODO();
   if (*success)
   {
-    printf("result:%d\n", result);
+    // printf("result:%d\n", result);
     return result;
   }
   else
@@ -416,7 +416,7 @@ static char *code_format =
     "  return 0; "
     "}";
 
-uint32_t choose(uint32_t n)
+uint32_t choose(uint32_t n)//随机生成数字
 {
   if (n == 0)
   {
@@ -425,34 +425,33 @@ uint32_t choose(uint32_t n)
   return rand() % n; // 生成一个小于 n 的随机数
 }
 
-static void check_div_zero(char *exp)
+static void check_div_zero(char *exp)//检查除0操作
 {
-  printf("buf:%s\n", exp);
-  char *pos = strchr(exp, '/');
+  // printf("buf:%s\n", exp);
+  char *pos = strchr(exp, '/');//定位除号位置
+
   if (pos == NULL)
   {
-    printf("there is zero /\n");
+    // printf("there is zero /\n");
   }
-  int time = 0;
+
+  int time = 0;//记录移除0的次数
   char *replace = pos;
 
-  for (; pos != NULL; pos = strchr(replace, '/'))
+  for (; pos != NULL; pos = strchr(replace, '/'))//一直找除号，直到全部处理完毕
   {
-    if (exp != NULL && pos != NULL)
-    {
-      printf("\nreplace:%s\n", replace);
-      printf("pos:%s\n", pos);
-    }
     
-    const char *start = pos;
-    start++;
-    printf("start:%s\n", start);
-    const char *end = start;
-    int count = 0;
+    const char *start = pos;//开始处理的位置
+    start++;//跳过除号
+
+    // printf("start:%s\n", start);//打印检查一下
+    const char *end = start;//结束处理的位置
+    int count = 0;//检查括号情况
+
     // 逐字符检查，直到遇到下一个运算符
     while (*end)
     {
-      if(*end ==' ')
+      if(*end ==' ')//如果是空格，就跳过处理
       {
       }
       else if (*end == '(')
@@ -473,41 +472,45 @@ static void check_div_zero(char *exp)
       }
       end++;
     }
+
     // 提取从start到end之间的字符串
-    printf("end:%s\n", end);
+    // printf("end:%s\n", end);
     size_t length = end - start;
 
     // printf("the length before '/' is %d\n", length);
+    //把需要检查的部分提取出来了
     char *beforeStr = (char *)malloc(length + 1);
     strncpy(beforeStr, start, length);
     beforeStr[length] = '\0';
-    printf("before_str:%s\n", beforeStr);
+    // printf("before_str:%s\n", beforeStr);
 
+    //通过expr来检查是否为0
     bool variable = true;        // 布尔变量
     bool *ifSuccess = &variable; // 布尔指针指向布尔变量
     int result = expr(beforeStr, ifSuccess);
 
-    if (result == 0 && *ifSuccess == false)
+
+    if (result == 0 || *ifSuccess == false)//把这部分删除掉
     {
       char *temp = pos + length + 1;
       memmove(pos, temp, strlen(temp) + 1);
       time++;
       replace = pos;
-      printf("Successfully removed the zero portion.\n");
+      // printf("Successfully removed the zero portion.\n");
     }
-    else
+    else//如果不是除0情况，跳过刚刚处理的长度的字段
     {
       replace = pos + length + 1;
     }
-    printf("success\n");
+    // printf("success\n");
   }
-  printf("\ncancel dive_zero %d\n", time);
-  printf("after check_div_zero: %s\n\n", exp);
+  // printf("\ncancel dive_zero %d\n", time);//统计一下情况
+  // printf("after check_div_zero: %s\n\n", exp);//打印处理后的情况检查一下
 }
 
-static void gen_rand_space()
+static void gen_rand_space()//添加空格
 {
-  switch (choose(4))
+  switch (choose(4))//这个算是算概率的
   {
   case 0:
     int loop = choose(2);
@@ -520,25 +523,32 @@ static void gen_rand_space()
     break;
   }
 }
-static void gen_num()
+
+static void gen_num()//随机生成num
 {
   int length = strlen(buf);
   int num = choose(20);
   if (length > 0)
   {
     char last_char = buf[length - 1]; // 获取最后一位字符
-    if (last_char == '/')
+    for(int i=1;last_char==' ';i++){
+    
+      last_char=buf[length-i];
+    
+    }
+    
+    if (last_char == '/')//如果是/
       num++;
   }
   char temp[20];
-  sprintf(temp, "%d", num);
-  gen_rand_space();
-  strcat(buf, temp);
+  sprintf(temp, "%d", num);//把num转化为字符
+  gen_rand_space();//随机加空格
+  strcat(buf, temp);//添加生成的数字
 }
 
 // __attribute__((unused)) 
 
-static void gen_rand_op()
+static void gen_rand_op()//生成运算符
 {
   
   gen_rand_space();
@@ -562,7 +572,7 @@ static void gen_rand_op()
   gen_rand_space();
 }
 
-static void gen(char a)
+static void gen(char a)//这个主要是添加()
 {
   char temp[20];
   sprintf(temp, "%c", a);
@@ -580,7 +590,7 @@ static void gen(char a)
 static void gen_rand_expr()
 {
   int length = (int)strlen(buf);
-  if (length <= 256)
+  if (length <= 256)//防止溢出
   {
     switch (choose(6))
     {
@@ -589,8 +599,11 @@ static void gen_rand_expr()
       if (length > 0)
       {
         char last_char = buf[length - 1]; // 获取最后一位字符
+        for(int i=1;last_char==' ';i++){//空格处理
+          last_char=buf[length-i]; 
+        }
         if (last_char == ')')
-          gen_rand_op();
+          gen_rand_op();//右括号前必须有运算符
       }
       gen_num();
       break;
@@ -598,6 +611,9 @@ static void gen_rand_expr()
       if (length > 0)
       {
         char last_char = buf[length - 1]; // 获取最后一位字符
+        for(int i=1;last_char==' ';i++){//空格处理
+          last_char=buf[length-i]; 
+        }
         if (last_char == ')')
           gen_rand_op();
         else if (last_char >= '0' && last_char <= '9')
@@ -628,7 +644,7 @@ static void gen_rand_expr()
   }
 }
 
-void clear_buffer()
+void clear_buffer()//清除buffer
 {
   buf[0] = '\0'; // 将第一个元素设置为 '\0'，清空字符串
 }
@@ -648,19 +664,23 @@ int main(int argc, char *argv[])
      这里是读取argv[1]中的整数，读取到的在loop中*/
   }
   int i;
-  init_regex();
+  init_regex();//初始化正则化
+
   for (i = 0; i < loop; i++)
   {
     printf("\nNo:%d\n", i);
+
     clear_buffer();
     gen_rand_expr();
 
     // strcat(buf, "(423-34)/(((3/4))/5)+34/23*1234*(132+4/56*443)");
-    check_div_zero(buf);
+    check_div_zero(buf);//处理除0操作
+
     bool variable = true;  // 布尔变量
     bool* ifSuccess = &variable;  // 布尔指针指向布尔变量
     char result_char[20];
     int result_int=expr(buf,ifSuccess);
+    printf("result :%d\n",result_int);
     sprintf(result_char, "%d", result_int); 
     sprintf(code_buf, code_format, buf,result_char); // 把code_format(buf)保存到code_buf中
 
@@ -684,8 +704,9 @@ int main(int argc, char *argv[])
     int result;
     ret = fscanf(fp, "%d", &result);
     pclose(fp);
-
+    printf("the gen_expr and value is : ");
     printf("%u %s\n", result, buf);
+
   }
   return 0;
 }

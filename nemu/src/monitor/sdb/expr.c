@@ -14,16 +14,20 @@
  ***************************************************************************************/
 
 #include <isa.h>
-
+#include <memory/vaddr.h>
+#include<memory/paddr.h>
 /* We use the POSIX regex functions to process regular expressions.
  * Type 'man regex' for more information about POSIX regex functions.
  */
 #include <regex.h>
+word_t expr(char *e, bool *success);
 
 enum
 {
   TK_NOTYPE = 256,
   TK_EQ,     // ==
+  TK_NEQ,     // !=
+  TK_AND,     // &&
   TK_NUM,    // 数字
   TK_HEX,    // 十六进制整数
   TK_ID,     // 标识符
@@ -51,7 +55,9 @@ static struct rule
 
     {" +", TK_NOTYPE}, // spaces
     {"\\+", TK_PLUS},  // plus
-    {"==", TK_EQ},     // equal
+    {"==", TK_EQ},     // 
+    {"!=", TK_NEQ},                   // !=
+    {"&&", TK_AND},                   // &&
 
     /*my add rules*/
     {"-", TK_MINUS},                   // -
@@ -62,6 +68,7 @@ static struct rule
     {"0[xX][0-9a-fA-F]+", TK_HEX},     // 16进制
     {"[0-9]+", TK_NUM},                // 数字
     {"\\$[a-zA-Z][0-9]", TK_REG},      // 寄存器，如 $a0, $t1, etc.
+    {"\\$pc",TK_REG},                  // 额外添加PC寄存器
     {"[a-zA-Z_][a-zA-Z0-9_]*", TK_ID}, // 标识符如 `number`)
 };
 
@@ -145,7 +152,7 @@ typedef struct token
 static Token tokens[22024] __attribute__((used)) = {}; // tokens数组用于按顺序存放已经被识别出的token信息
 static int nr_token __attribute__((used)) = 0;      // 指示已经被识别出的token数目
 
-static bool make_token(char *e)
+static bool make_token(char *e)//这个函数是为了把expr与rules匹配
 {
   int position = 0;
   int i;
@@ -192,27 +199,32 @@ static bool make_token(char *e)
 
         case TK_PLUS:
         case TK_MINUS:
-        case TK_MUL:
         case TK_DIV:
         case TK_EQ:
         case TK_LPAREN:
+        case TK_NEQ:      // 添加不等于的处理
+        case TK_AND:      // 添加逻辑与的处理
         case TK_RPAREN:
-          // 对于这些运算符，直接记录类型
+          // 直接记录类型
           tokens[nr_token].type = rules[i].token_type;
           nr_token++;
           break;
 
-        case TK_DEREF:
+        case TK_MUL:
           // 检查前一个token以确定`*`是解引用还是乘法
           if (nr_token == 0 || tokens[nr_token - 1].type == TK_PLUS ||
               tokens[nr_token - 1].type == TK_MINUS || tokens[nr_token - 1].type == TK_MUL ||
               tokens[nr_token - 1].type == TK_DIV || tokens[nr_token - 1].type == TK_LPAREN)
           {
+            // printf("解引用\n");
             tokens[nr_token].type = TK_DEREF; // 解引用
+            // 直接记录类型
           }
           else
           {
+            // printf("乘法\n");
             tokens[nr_token].type = TK_MUL; // 乘法
+            // 直接记录类型
           }
           nr_token++;
           break;
@@ -235,7 +247,9 @@ static bool make_token(char *e)
   return true;
 }
 
-bool check_parentheses(int p, int q)
+
+
+bool check_parentheses(int p, int q)//判断()批评情况
 {
   // Log("check_parentheses   p:%d\tq:%d\n",p,q);
   // Log("tokens[p].type:%d\tTK_LPAREN:%d\n",tokens[p].type,TK_LPAREN);
@@ -271,27 +285,46 @@ bool check_parentheses(int p, int q)
   }
 }
 
-int get_operator_priority(int op) // 这个函数是用来得到优先级排名的，
-{
-  switch (op)
-  {
-  case TK_PLUS:
-  case TK_MINUS:
-    return 1; // 加减法优先级比较低
-  case TK_MUL:
-  case TK_DIV:
-    return 2; // 乘除法优先级要大一些
-  default:
-    return 100; // 假设一个比所有运算符优先级高的值
+// int get_operator_priority(int op) // 这个函数是用来得到优先级排名的，
+// {
+//   switch (op)
+//   {
+//   case TK_PLUS:
+//   case TK_MINUS:
+//     return 1; // 加减法优先级比较低
+//   case TK_MUL:
+//   case TK_DIV:
+//     return 2; // 乘除法优先级要大一些
+//   default:
+//     return 100; // 假设一个比所有运算符优先级高的值
+//   }
+// }
+int get_operator_priority(int op) {
+  switch (op) {
+    case TK_AND:
+      return 0; // && 的优先级最低
+    case TK_EQ:
+    case TK_NEQ:
+      return 1; // == 和 != 的优先级较低
+    case TK_PLUS:
+    case TK_MINUS:
+      return 2; // 加减法优先级较低
+    case TK_MUL:
+    case TK_DIV:
+      return 3; // */优先级较高
+    case TK_DEREF:
+      return 4; // 解引用优先级最高
+    default:
+      return 100; // 假设一个比所有运算符优先级高的值
   }
 }
 
-int find_main_operator(int p, int q)
+int find_main_operator(int p, int q)//找出主运算符
 {
   int main_op = -1;
-  int min_priority = 100;
+  int main_priority = 100;
   int count = 0; // 用count来判断是否在括号内
-  for (int i = p; i <= q; i++)
+  for (int i = p; i <= q; i++)//一个个字符验证
   {
     if (tokens[i].type == TK_LPAREN)
     {
@@ -305,10 +338,10 @@ int find_main_operator(int p, int q)
     }
     else if (count == 0) // 这就是在括号外的意思了
     {
-      int he_priority = get_operator_priority(tokens[i].type);
-      if (he_priority <= min_priority)
+      int priority = get_operator_priority(tokens[i].type);
+      if (priority <= main_priority)//通过迭代找到最小优先级
       {
-        min_priority = he_priority;
+        main_priority = priority;
         main_op = i;
       }
     }
@@ -316,16 +349,68 @@ int find_main_operator(int p, int q)
   return main_op;
 }
 
+uint32_t deference (int op,bool *success)
+{
+  char* str=tokens[op+1].str;
+  if (strlen(str)<2)
+  {
+    success=false;
+    printf("Dereference error, please check.\n");
+  }
+  char prefix[3]; // 多一个空间来存放字符串结束符  
+  strncpy(prefix, str, 2);  
+  prefix[2] = '\0'; // 确保字符串以'\0'结束  
+
+    // 判断前两个字符是否与目标字符相同  
+  if (strcmp(prefix, "0x") == 0 || strcmp(prefix, "0X") == 0) {  
+
+      uint32_t addr = expr(str,success);
+      return memory_scan_one(addr,4);
+  } 
+  else if (isa_reg_num(str)!=-1)
+  {
+      int len=strlen(str);
+
+      char reg_name[len+2];
+      reg_name[0]='$';
+      strcpy(reg_name + 1, str);  
+      uint32_t value=expr(reg_name,success);
+      return value;
+  }
+  else{
+      printf("Dereference error, please check.\n");
+      success=false;
+      return 0;
+    }
+}
+
 uint32_t eval(int p, int q, bool *success)
 {
   // printf("p:%d\tq:%d\n",p,q);
-  if (p > q)
+  if (p > q)//明显的问题
   {
     assert(0);
   }
-  else if (p == q) // 应该是个数字
+
+  else if (p == q) // 应该是个值
   {
-    return strtol(tokens[p].str, NULL, 10); // 返回数字的值，这里注意字符的转换
+    switch (tokens[p].type)
+    {
+      case TK_NUM:
+        return strtol(tokens[p].str, NULL, 10); // 返回数字的值，这里注意字符的转换
+      case TK_HEX:
+        uint32_t xNum=strtol(tokens[p].str, NULL, 16);
+        Log("The hexadecimal representation of this number is %x",xNum);
+        return  xNum;// 返回16进制
+      case TK_REG://这里返回的是寄存器的值
+        uint32_t reg = isa_reg_str2val(tokens[p].str,success);
+        // uint32_t value=memory_scan_one(reg,4);
+        Log("the value of this reg is %x",reg);
+        // Log("the value of this reg is %d",value);
+        return reg;
+      default:
+        assert(0);
+    }
   }
   else if (check_parentheses(p, q) == true) // 括号匹配处理
   {
@@ -334,29 +419,44 @@ uint32_t eval(int p, int q, bool *success)
   }
   else // 这里主要是处理更复杂的情况，比如说第三种、第五种
   {
-    int op = find_main_operator(p, q);
-    Log("op:%d\t tokens[op].type:%d", op, tokens[op].type);
-    uint32_t val1 = eval(p, op - 1, success);
-    printf("val1:%d\n", val1);
+    
+    int op = find_main_operator(p, q);//找到主运算符，把主运算符分为两部分
+    if(tokens[op].type==TK_DEREF){
+      // printf("get into deference\n");
+    uint32_t addr=deference ( op,success);
+     return addr;
+    }
+    
+    uint32_t val1 = eval(p, op - 1, success);//分别计算两部分的值
+    // printf("val1:%u\n", val1);
     uint32_t val2 = eval(op + 1, q, success);
-    if (tokens[op].type == TK_DIV && val2 == 0)
+
+    if (tokens[op].type == TK_DIV && val2 == 0)//如果是除法，需要除0预防
     {
       Log("0 cannot be used as a divisor, please re-enter."); // 除0预防
       *success = false;
       return 0;
     }
-    printf("val2:%d\n", val2);
+    // printf("val2:%d\n", val2);
 
-    switch (tokens[op].type)
+    switch (tokens[op].type)//处理运算符
     {
     case TK_PLUS:
       return val1 + val2;
     case TK_MINUS:
       return val1 - val2;
     case TK_MUL:
+    // printf("get into *\n");
       return val1 * val2;
     case TK_DIV:
       return val1 / val2;
+    case TK_EQ:
+      return val1 == val2;
+    case TK_NEQ:
+      return val1 != val2;
+    case TK_AND:
+      return val1 && val2;
+    
     default:
       assert(0);
     }
@@ -365,20 +465,20 @@ uint32_t eval(int p, int q, bool *success)
 
 word_t expr(char *e, bool *success)
 {
-  if (!make_token(e))
+  if (!make_token(e))//先处理字符串的正则化
   {
     *success = false;
     printf("make_token false\n");
     return 0;
   }
 
-  printf("%d\n", nr_token);
   uint32_t result = eval(0, nr_token - 1, success);
   /* TODO: Insert codes to evaluate the expression. */
-  // TODO();
+
   if (*success)
   {
-    Log("result:%d", result);
+    Log("result:0x%x", result);//打印result，这里有个bug就是，打印16进制结果是10进制，
+                            
     return result;
   }
   else

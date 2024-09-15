@@ -21,6 +21,8 @@
 word_t vaddr_ifetch(vaddr_t addr, int len);
 word_t vaddr_read(vaddr_t addr, int len);
 void vaddr_write(vaddr_t addr, int len, word_t data);
+uint32_t memory_scan_one(uint32_t num_addr,int bytes_per_line);
+void memory_scan(uint32_t start_addr,int length);
 
 #define PAGE_SHIFT        12
 #define PAGE_SIZE         (1ul << PAGE_SHIFT)

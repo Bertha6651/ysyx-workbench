@@ -14,6 +14,8 @@
 ***************************************************************************************/
 
 #include <isa.h>
+#include <memory/vaddr.h>
+#include <memory.h>
 #include <cpu/cpu.h>
 #include <readline/readline.h>
 #include <readline/history.h>
@@ -26,9 +28,16 @@
 
 static int is_batch_mode = false;
 
+//初始化正则表达式
 void init_regex();
+
+//监视功能函数
 void init_wp_pool();
 void wp_pool_display();
+void set_wp(char *args);
+void display_watchPoints();
+void free_wp(int num);
+bool check_watchPoints(); //检查监视点的值是否改变
 
 
 
@@ -71,14 +80,13 @@ static int cmd_q(char *args)
 static int cmd_help(char *args);
 
 static int cmd_si(char *args){
-  char *arg = strtok(NULL, " ");
   int Num;
-  if (arg == NULL){
+  if (args == NULL){
     cpu_exec(1);
   }else {
       int n = sscanf(args, "%d", &Num);  
        if (n == 1) {  
-        printf("successfully obtained the integer: %d\n", Num);  
+        // printf("successfully obtained the integer: %d\n", Num);  
         cpu_exec(Num);
       } else {  
         printf("Incorrect input format, please enter again. \tReference format: si [N]");  
@@ -89,20 +97,21 @@ static int cmd_si(char *args){
   return 0;
 }
 
+
+
 static int cmd_info(char *args){
-  char *arg = strtok(NULL, " ");
-  if(arg==NULL)
+  if(args==NULL)
   {
     printf("Incorrect input format, please enter again.\n");  
     printf("Reference format: info SUBCMD\n\tinfo r: Print the state of registers\n\tinfo w: watchpoint information.\n");  
     return 0;  
   }
-  else if (strcmp(arg, "r") == 0){
+  else if (strcmp(args, "r") == 0){
     isa_reg_display();
     return 0;
   } 
-  else if (strcmp(arg,"w")==0){
-    
+  else if (strcmp(args,"w")==0){
+  display_watchPoints();
     return 0;
 
   }
@@ -116,21 +125,39 @@ static int cmd_info(char *args){
 
 static int cmd_x(char *args){
   char *N = strtok(NULL, " ");
+  char *EXPR = strtok(NULL, " ");
+
+  if (N == NULL || EXPR == NULL) {
+        printf("Usage: x <length> <address>\n");
+        return 0;
+  }
+
   int Num;
-  int n = sscanf(N, "%d", &Num);
+  int n = sscanf(N, "%d", &Num);//获取第二个字段，并转换为int型
   if (n != 1) {  
     printf("Incorrect input format, please enter again. \tReference format: si [N]");  
     return 0;
   }   
-  printf("N:%d\n",Num);
-  char *EXPR = strtok(NULL, " ");
-  printf("EXPR:%s\n",EXPR);
+
+  // printf("N:%d\n",Num);
+  // printf("EXPR:%s\n",EXPR);
+
+  bool variable = true;  // 布尔变量
+  bool* ifSuccess = &variable;  // 布尔指针指向布尔变量
+  
+  uint32_t start_addr =  expr(EXPR, ifSuccess);
+  if(!ifSuccess)
+  {
+    printf("表达式错误或者程序错误\n");
+  }
+
+  memory_scan(start_addr, Num);  // 执行内存扫描
 return 0;
 }
 
 static int cmd_p(char *args){
   char *EXPR=args;
-  printf("%s\n",EXPR);
+  // printf("%s\n",EXPR);
   //这里之前遇到一点bug
   bool variable = true;  // 布尔变量
   bool* ifSuccess = &variable;  // 布尔指针指向布尔变量
@@ -145,12 +172,34 @@ static int cmd_p(char *args){
 }
 
 static int cmd_w(char *args){
+  if(args==NULL)
+  {
+    printf("Incorrect input format, please enter again.\n");  
+    return 0;  
+  }
+set_wp(args);
+
+
 return 0;
 }
 
 static int cmd_d(char *args){
+  if(args==NULL)
+  {
+    printf("Incorrect input format, please enter again.\n");  
+    return 0;  
+  }
+  int Num;
+  int n = sscanf(args, "%d", &Num);//获取第二个字段，并转换为int型
+  if (n != 1) {  
+    printf("Incorrect input format, please enter again. \tReference format: d [N]");  
+    return 0;
+  }
+ free_wp( Num);
+
 return 0;
 }
+
 static struct {  
   const char *name;  
   const char *description;  
@@ -220,12 +269,12 @@ void sdb_mainloop()
          should  be  specified  in str.  In each subsequent call that should parse
          the same string, str must be NULL.*/   
 
-    if (cmd == NULL) { continue; }//如果cmd直接等于NULL，结束循环
+    if (cmd == NULL) { continue; }//如果cmd直接等于NULL，继续循环
 
     /* treat the remaining string as the arguments,将剩下的string当做参数
      * which may need further parsing
      */
-    char *args = cmd + strlen(cmd) + 1;//判断正常长度
+    char *args = cmd + strlen(cmd) + 1;//获取后面的参数（如help w ,获取了w）
     if (args >= str_end)
     {
       args = NULL;
@@ -239,7 +288,7 @@ void sdb_mainloop()
     int i;
     for (i = 0; i < NR_CMD; i ++) 
     {
-      if (strcmp(cmd, cmd_table[i].name) == 0) 
+      if (strcmp(cmd, cmd_table[i].name) == 0) //匹配cmd_table
       /*C 库函数 int strcmp(const char *str1, const char *str2) 
       把 str1 所指向的字符串和 str2 所指向的字符串进行比较。
 
