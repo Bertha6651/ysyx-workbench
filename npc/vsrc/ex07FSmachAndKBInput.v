@@ -36,6 +36,7 @@ module ex07FSmachAndKBInput (
 
 
   reg [3:0] state_current,state_next;
+
   //状态机第一段
   always @(posedge clk or posedge rst)
   begin
@@ -44,6 +45,7 @@ module ex07FSmachAndKBInput (
 
     else  state_current<=state_next;
   end
+
   //状态机第二段
   always @(*)
   begin
@@ -59,6 +61,7 @@ module ex07FSmachAndKBInput (
       default:state_next=s04Iitn;
     endcase
   end
+  
   //状态机第三段，信号输出逻辑
   always @(posedge clk)
   begin
