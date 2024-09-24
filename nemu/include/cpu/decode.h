@@ -17,7 +17,12 @@
 #define __CPU_DECODE_H__
 
 #include <isa.h>
-
+/*
+  在程序分析领域中, 静态指令是指程序代码中的指令, 动态指令是指程序运行过程中的指令. 
+  snpc是下一条静态指令, 而dnpc是下一条动态指令. 对于顺序执行的指令, 它们的snpc和dnpc是一样的; 
+  但对于跳转指令, snpc和dnpc就会有所不同, dnpc应该指向跳转目标的指令. 
+显然, 我们应该使用s->dnpc来更新PC, 并且在指令执行的过程中正确地维护s->dnpc
+*/
 typedef struct Decode {
   vaddr_t pc;
   vaddr_t snpc; // static next pc

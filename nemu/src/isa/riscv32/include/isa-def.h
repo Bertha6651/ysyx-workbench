@@ -27,9 +27,18 @@ typedef struct {
 typedef struct {
   union {
     uint32_t val;
-  } inst;
+  } inst;//inst的值
 } MUXDEF(CONFIG_RV64, riscv64_ISADecodeInfo, riscv32_ISADecodeInfo);
 
+
+/* union 共用体名{
+    成员列表
+};
+在C和C++编程语言中，union（联合体）是一种数据结构，
+用于在同一个内存位置上存储不同的数据类型。与 struct（结构体）不同，
+union 中的所有成员共享同一块内存，
+这意味着一个 union 在任何时刻只能存储一个成员的值。
+*/
 #define isa_mmu_check(vaddr, len, type) (MMU_DIRECT)
 
 #endif

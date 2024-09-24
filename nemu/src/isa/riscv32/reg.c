@@ -47,6 +47,7 @@ int isa_reg_num(const char*s)
     }
     return -1;
 }
+
 word_t isa_reg_str2val(const char *s, bool *success) {
     s+=1;
     // 遍历所有寄存器名进行匹配
