@@ -21,14 +21,17 @@
 #if   defined(CONFIG_PMEM_MALLOC)
 static uint8_t *pmem = NULL;
 #else // CONFIG_PMEM_GARRAY
-//#define CONFIG_MSIZE 0x8000000
 
+//#define CONFIG_MSIZE 0x8000000
 static uint8_t pmem[CONFIG_MSIZE] PG_ALIGN = {};
 #endif
 
-uint8_t* guest_to_host(paddr_t paddr)//将一个物理地址 (paddr_t paddr) 从 "来宾" 地址空间转换为 "主机" 地址空间的指针。
-//表示返回一个指向 8 位无符号整数的指针
+/*将一个物理地址 (paddr_t paddr) 从 "来宾" 地址空间转换为 "主机" 地址空间的指针。
+表示返回一个指向 8 位无符号整数的指针
+#define CONFIG_MBASE 0x80000000*/
+uint8_t* guest_to_host(paddr_t paddr)
  { return pmem + paddr - CONFIG_MBASE; }
+
   //  An  unsigned integer type of a fixed width of exactly N bits, N being
   // the value specified in its type name.  According to  the  C  language
   // standard,  they  shall  be capable of storing values in the range 
@@ -36,7 +39,7 @@ uint8_t* guest_to_host(paddr_t paddr)//将一个物理地址 (paddr_t paddr) 从
 paddr_t host_to_guest(uint8_t *haddr) { return haddr - pmem + CONFIG_MBASE; }//CONFIG_MBASE:物理地址空间的起始位置
 
 static word_t pmem_read(paddr_t addr, int len) {
-  word_t ret = host_read(guest_to_host(addr), len);
+  word_t ret = host_read(guest_to_host(addr), len);//guest_to_host(地址转换)
   return ret;
 }
 
@@ -60,7 +63,7 @@ void init_mem() {
 }
 
 word_t paddr_read(paddr_t addr, int len) {
-  if (likely(in_pmem(addr))) return pmem_read(addr, len);
+  if (likely(in_pmem(addr))) return pmem_read(addr, len);//判断是否越界
   IFDEF(CONFIG_DEVICE, return mmio_read(addr, len));
   out_of_bound(addr);
   return 0;

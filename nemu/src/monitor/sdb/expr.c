@@ -69,6 +69,11 @@ static struct rule
     {"[0-9]+", TK_NUM},                // 数字
     {"\\$[a-zA-Z][0-9]", TK_REG},      // 寄存器，如 $a0, $t1, etc.
     {"\\$pc",TK_REG},                  // 额外添加PC寄存器
+    {"\\$ra",TK_REG},                  // 额外添加ra寄存器
+    {"\\$sp",TK_REG},                  // 额外添加sp寄存器
+    {"\\$gp",TK_REG},                  // 额外添加gp寄存器
+    {"\\$tp",TK_REG},                  // 额外添加tp寄存器
+    
     {"[a-zA-Z_][a-zA-Z0-9_]*", TK_ID}, // 标识符如 `number`)
 };
 
@@ -477,7 +482,7 @@ word_t expr(char *e, bool *success)
 
   if (*success)
   {
-    Log("result:0x%x", result);//打印result，这里有个bug就是，打印16进制结果是10进制，
+    Log("result:%u", result);//打印result，这里有个bug就是，打印16进制结果是10进制，
                             
     return result;
   }

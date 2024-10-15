@@ -40,12 +40,12 @@ run-env: $(BINARY) $(DIFF_REF_SO)
 # 	$(NEMU_EXEC)
 
 run: run-env
-	$(call git_commit, "PA1完成，预学习完成")
+	$(call git_commit, "PA2.1完成，但是还有bug要改（有指令不过关）")
 	$(NEMU_EXEC)
 
 
 gdb: run-env
-	$(call git_commit, "gdb NEMU")
+#$(call git_commit, "gdb NEMU")
 	gdb -s $(BINARY) --args $(NEMU_EXEC)
 
 clean-tools = $(dir $(shell find ./tools -maxdepth 2 -mindepth 2 -name "Makefile"))

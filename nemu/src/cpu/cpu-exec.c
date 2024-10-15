@@ -102,7 +102,7 @@ static void exec_once(Decode *s, vaddr_t pc)
   void disassemble(char *str, int size, uint64_t pc, uint8_t *code, int nbyte); // 调用反汇编函数，将指令的机器码翻译为汇编语言，并写入日志。
   disassemble(p, s->logbuf + sizeof(s->logbuf) - p,
               MUXDEF(CONFIG_ISA_x86, s->snpc, s->pc), (uint8_t *)&s->isa.inst.val, ilen);
-  // printf("s->snpc:%x\ns->pc:%x\n",s->snpc,s->pc);
+  printf("s->snpc:%x\ns->pc:%x\n",s->snpc,s->pc);
   // printf("MUXDEF(CONFIG_ISA_x86, s->snpc, s->pc):%x\n",MUXDEF(CONFIG_ISA_x86, s->snpc, s->pc));
   // printf("&s->isa.inst.val:0x%X\nilen:%x\n",s->isa.inst.val,ilen);
 #else

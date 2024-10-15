@@ -32,9 +32,15 @@ typedef struct Decode {
 } Decode;
 
 // --- pattern matching mechanism ---
+/*
+pattern_decode()函数将模式字符串中的0和1抽取到整型变量key中, 
+mask表示key的掩码, 
+shift则表示opcode距离最低位的比特数量,用于帮助编译器进行优化
+*/
 __attribute__((always_inline))
 static inline void pattern_decode(const char *str, int len,
-    uint64_t *key, uint64_t *mask, uint64_t *shift) {
+    uint64_t *key, uint64_t *mask, uint64_t *shift) 
+{
   uint64_t __key = 0, __mask = 0, __shift = 0;
 #define macro(i) \
   if ((i) >= len) goto finish; \
@@ -92,6 +98,10 @@ finish:
 
 
 // --- pattern matching wrappers for decode ---
+/*
+#define STRLEN(CONST_STR) (sizeof(CONST_STR) - 1)
+此时指令满足上述宏展开的if语句, 表示匹配到auipc指令的编码, 因此将会进行进一步的译码操作
+*/
 #define INSTPAT(pattern, ...) do { \
   uint64_t key, mask, shift; \
   pattern_decode(pattern, STRLEN(pattern), &key, &mask, &shift); \

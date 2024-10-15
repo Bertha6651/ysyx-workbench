@@ -46,7 +46,7 @@ static void decode_operand(Decode *s, int *rd, word_t *src1, word_t *src2, word_
 static int decode_exec(Decode *s) {
   int rd = 0;
   word_t src1 = 0, src2 = 0, imm = 0;
-  s->dnpc = s->snpc;
+  s->dnpc = s->snpc;//静态指令赋值给动态指令
 
 #define INSTPAT_INST(s) ((s)->isa.inst.val)
 #define INSTPAT_MATCH(s, name, type, ... /* execute body */ ) { \
@@ -69,6 +69,7 @@ static int decode_exec(Decode *s) {
 }
 
 int isa_exec_once(Decode *s) {
-  s->isa.inst.val = inst_fetch(&s->snpc, 4);//这个返回值是
+  s->isa.inst.val = inst_fetch(&s->snpc, 4);//这个返回值是识别出指令的val
+  //返回的s->snpc中指针指向已经移动了
   return decode_exec(s);
 }

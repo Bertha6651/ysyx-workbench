@@ -21,6 +21,13 @@
 
 // The macro `__GUEST_ISA__` is defined in $(CFLAGS).
 // It will be expanded as "x86" or "mips32" ...
+/*
+typedef struct {
+  union {
+    uint32_t val;
+  } inst;//inst的值
+} MUXDEF(CONFIG_RV64, riscv64_ISADecodeInfo, riscv32_ISADecodeInfo);
+*/
 typedef concat(__GUEST_ISA__, _CPU_state) CPU_state;//如riscv32_CPU_state
 typedef concat(__GUEST_ISA__, _ISADecodeInfo) ISADecodeInfo;//解码的信息
 
