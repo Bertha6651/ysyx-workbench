@@ -19,7 +19,6 @@
 
 static inline uint32_t inst_fetch(vaddr_t *pc, int len) {
   uint32_t inst = vaddr_ifetch(*pc, len);
-  Log("pc is 0x%x",*pc);
   (*pc) += len;//pc指针移动
   return inst;
 }

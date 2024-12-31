@@ -40,7 +40,7 @@ run-env: $(BINARY) $(DIFF_REF_SO)
 # 	$(NEMU_EXEC)
 
 run: run-env
-	$(call git_commit, "PA2.1完成，但是还有bug要改（有指令不过关）")
+# $(call git_commit, "PA2.1完成，但是还有bug要改（有指令不过关）")
 	$(NEMU_EXEC)
 
 
